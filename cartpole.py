@@ -160,7 +160,6 @@ def select_action(state):
     eps_threshold = EPS_END + (EPS_START - EPS_END) * \
         math.exp(-1. * steps_done / EPS_DECAY)
     steps_done += 1
-    print(eps_threshold)
     if sample > eps_threshold:
         with torch.no_grad():
             return policy_net(state).max(1)[1].view(1, 1)
@@ -209,15 +208,25 @@ def optimize_model():
     action_batch = torch.cat(batch.action)
     reward_batch = torch.cat(batch.reward)
 
+    associated_action = policy_net(state_batch)
+    # print(associated_action.shape)
+    # print(associated_action)
+    # print(action_batch.shape)
+
     # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
     # columns of actions taken
     state_action_values = policy_net(state_batch).gather(1, action_batch)
+    print(state_action_values)
 
     # Compute V(s_{t+1}) for all next states.
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
+    print(non_final_next_states)
+    print(target_net(non_final_next_states))
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     # Compute the expected Q values
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
+
+    print(expected_state_action_values)
 
     # Compute Huber loss
     loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
@@ -240,7 +249,9 @@ for i_episode in range(num_episodes):
     for t in count():
         # Select and perform an action
         action = select_action(state)
-        _, reward, done, _ = env.step(action.item())
+        print(action.shape)
+        print(action)
+
         _, reward, done, _ = env.step(action.item())
         
         reward = torch.tensor([reward], device=device)
