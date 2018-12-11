@@ -82,7 +82,7 @@ for game in range(num_games):
 			l.action_history = -(log - avg)
 
 
-		env.step(save)
+		env.step_simple(save)
 		score = env.points
 		if(score == 50):
 			num_yahtzees += 1
