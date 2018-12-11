@@ -67,14 +67,24 @@ class Linear(nn.Module):
         self.l2 = nn.Linear(128, out_channels)
         self.sm = nn.Softmax(dim=0)
         self.drop = nn.Dropout(p=0.6)
-        self.loss = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.parameters(), lr=.001)
         self.action_history = Variable(torch.Tensor(), requires_grad=True)
-        self.reward_history = Variable(torch.Tensor(), requires_grad=True)
-    
-    def compute_loss(self, reward_vec, optimal_vec):
-    	return self.loss(reward_vec, optimal_vec)
+        self.optimizer = optim.Adam(self.parameters(), lr=.001)
+        # self.reward_history = Variable(torch.Tensor(), requires_grad=True)
+
 
     def forward(self, x):
-        x = functional.relu(self.drop(self.l1(x)))
+        x = self.drop(self.l1(x))
         return self.sm(self.l2(x))
+
+
+
+class Stupid(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(Stupid, self).__init__()
+        self.l = nn.Linear(in_channels, out_channels)
+        self.sm = nn.Softmax(dim=0)
+        self.optimizer = optim.SGD(self.parameters(), lr=.001)
+
+
+    def forward(self, x):
+        return self.sm(self.l(x))

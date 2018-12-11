@@ -253,6 +253,7 @@ for i_episode in range(num_episodes):
         print(action)
 
         _, reward, done, _ = env.step(action.item())
+        print(reward)
         
         reward = torch.tensor([reward], device=device)
 
