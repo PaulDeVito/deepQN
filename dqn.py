@@ -69,7 +69,6 @@ class Linear(nn.Module):
         self.drop = nn.Dropout(p=0.6)
         self.action_history = Variable(torch.Tensor(), requires_grad=True)
         self.optimizer = optim.Adam(self.parameters(), lr=.001)
-        # self.reward_history = Variable(torch.Tensor(), requires_grad=True)
 
 
     def forward(self, x):
