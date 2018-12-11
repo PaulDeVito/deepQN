@@ -14,6 +14,16 @@ from torch.autograd import Variable
 from torch.distributions import Categorical
 
 
+def generate_input(dice, rolls_left):
+	inputs = np.zeros((6,6))
+	for i in range(5):
+		for j in range(dice[i]):
+			inputs[j][i] = 1
+
+	for j in range(rolls_left):
+		inputs[j][5] = 1
+	return inputs
+
 def choose_action_greedy(dice, model):
 	state = Variable(torch.tensor(dice).type(torch.FloatTensor))
 	distribution = model(state)
@@ -44,9 +54,10 @@ l = dqn.Linear(num_dice,2 ** num_dice)
 
 
 num_games = 1000000
-env = yt.mini_environment(num_dice, 6)
+env = yt.full_environment("all")
+# some much needed testing. like why is there no yahtzee
 epoch_length = 10000
-rolls_allowed = 2
+rolls_allowed = 3
 
 long_running_average = []
 long_loss_history = []
@@ -71,8 +82,8 @@ for game in range(num_games):
 			l.action_history = -(log - avg)
 
 
-		env.step_simple(save)
-		score = env.points
+		env.step(save)
+		score = env.score("all")
 		if(score == 50):
 			num_yahtzees += 1
 		reward = score - prev_score
