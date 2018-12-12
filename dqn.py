@@ -26,9 +26,9 @@ class DQN_dice(nn.Module):
 class DQN_toy(nn.Module):
 	def __init__(self):
 		super(DQN_toy, self).__init__()
-		self.conv1 = nn.Conv1d(6, 32, kernel_size=3, stride=2)
-		self.conv2 = nn.Conv1d(32, 32, kernel_size=4, stride=2)
-		self.head = nn.Linear(32, 5)
+		self.conv1 = nn.Conv1d(6, 64, kernel_size=3, stride=2)
+		self.conv2 = nn.Conv1d(64, 364, kernel_size=4, stride=2)
+		self.head = nn.Linear(64, 32)
 		self.optimizer = optim.RMSprop(self.parameters())
 
 	def forward(self, x):
@@ -38,24 +38,40 @@ class DQN_toy(nn.Module):
 		return output.data[0]
 
 
+class DQN(nn.Module):
+	def__init_(self):
+		super(DQN, self).__init__()
+		self.conv1 = nn.Conv1d(6, 64, kernel_size=3, stride=2)
+		self.conv2 = nn.Conv1d(64, 364, kernel_size=4, stride=2)
+		self.head = nn.Linear(64, 32)
+		self.drop = nn.Dropout(p=0.6)
+        self.sm = nn.Softmax(dim=0)
+        self.action_history = Variable(torch.Tensor(), requires_grad=True)
+        self.optimizer = optim.Adam(self.parameters(), lr=.001)
 
 
+	def forward(self, x):
+		x = functional.relu(self.conv1(x))
+		x = functional.relu(self.conv2(x))
+		return self.sm(self.head(x))
 
 
-class LogisticRegression(nn.Module):
-    def __init__(self, input_size, num_classes):
-        super(LogisticRegression, self).__init__()
-        self.linear = nn.Linear(input_size, num_classes)
-        self.loss = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(self.parameters(), lr=.001)
-    
-    def compute_loss(self, reward_vec, optimal_vec):
-    	return self.loss(reward_vec, optimal_vec)
+class DQN_BatchNorm(nn.Module):
+	def__init_(self):
+		super(DQN, self).__init__()
+		self.conv1 = nn.Conv1d(6, 64, kernel_size=3, stride=2)
+		self.conv2 = nn.Conv1d(64, 364, kernel_size=4, stride=2)
+		self.head = nn.Linear(64, 32)
+		self.drop = nn.Dropout(p=0.6)
+        self.sm = nn.Softmax(dim=0)
+        self.action_history = Variable(torch.Tensor(), requires_grad=True)
+        self.optimizer = optim.Adam(self.parameters(), lr=.001)
 
-    def forward(self, x):
-        out = functional.relu(self.linear(x))
-        out[out !=0] = 1
-        return out
+
+	def forward(self, x):
+		x = functional.relu(self.conv1(x))
+		x = functional.relu(self.conv2(x))
+		return self.sm(self.head(x))
 
 
 torch.autograd.enable_grad

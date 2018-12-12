@@ -53,7 +53,7 @@ l = dqn.Linear(num_dice,2 ** num_dice)
 
 
 
-num_games = 10000000
+num_games = 100000000
 env = yt.full_environment("all")
 # some much needed testing. like why is there no yahtzee
 epoch_length = 100000
