@@ -185,6 +185,13 @@ for game in range(num_games):
 		loss_history = []
 		num_yahtzees = 0
 
+		with open('output.csv', mode='w') as out_file:
+			out_writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
+			for i in range(len(long_running_average)):
+				out_writer.writerow([i*epoch_length,long_running_average[i],long_loss_history[i],long_num_yahtzees[i]])
+
+
+
 print("Long running averate:")
 print(long_running_average)
 print("Loss history")

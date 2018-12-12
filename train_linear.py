@@ -14,16 +14,6 @@ from torch.autograd import Variable
 from torch.distributions import Categorical
 
 
-def generate_input(dice, rolls_left):
-	inputs = np.zeros((6,6))
-	for i in range(5):
-		for j in range(dice[i]):
-			inputs[j][i] = 1
-
-	for j in range(rolls_left):
-		inputs[j][5] = 1
-	return inputs
-
 def choose_action_greedy(dice, model):
 	state = Variable(torch.tensor(dice).type(torch.FloatTensor))
 	distribution = model(state)
@@ -53,11 +43,10 @@ l = dqn.Linear(num_dice,2 ** num_dice)
 
 
 
-num_games = 100000000
-env = yt.full_environment("all")
-# some much needed testing. like why is there no yahtzee
-epoch_length = 100000
-rolls_allowed = 3
+num_games = 1000000
+env = yt.mini_environment(num_dice, 6)
+epoch_length = 10000
+rolls_allowed = 2
 
 long_running_average = []
 long_loss_history = []
@@ -82,8 +71,8 @@ for game in range(num_games):
 			l.action_history = -(log - avg)
 
 
-		env.step(save)
-		score = env.score("all")
+		env.step_simple(save)
+		score = env.points
 		if(score == 50):
 			num_yahtzees += 1
 		reward = score - prev_score
@@ -120,13 +109,6 @@ for game in range(num_games):
 		running_average = []
 		loss_history = []
 		num_yahtzees = 0
-
-		with open('output.csv', mode='w') as out_file:
-			out_writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-			for i in range(len(long_running_average)):
-				out_writer.writerow([i*epoch_length,long_running_average[i],long_loss_history[i],long_num_yahtzees[i]])
-
-
 
 print("Long running averate:")
 print(long_running_average)

@@ -14,14 +14,23 @@ from torch.autograd import Variable
 from torch.distributions import Categorical
 
 
-def generate_input(dice, rolls_left):
-	inputs = np.zeros((6,6))
-	for i in range(5):
-		for j in range(dice[i]):
-			inputs[j][i] = 1
+# def generate_input(dice, rolls_left):
+# 	inputs = np.zeros((6,6))
+# 	for i in range(5):
+# 		for j in range(dice[i]):
+# 			inputs[j][i] = 1
 
-	for j in range(rolls_left):
-		inputs[j][5] = 1
+# 	for j in range(rolls_left):
+# 		inputs[j][5] = 1
+# 	return inputs
+
+
+def generate_input(dice):
+	inputs = np.zeros((5,6))
+	for i in range(5):
+		inputs[i][dice[i]-1] = 1
+	# for j in range(rolls_left):
+		# inputs[j][5] = 1
 	return inputs
 
 def choose_action_greedy(dice, model):
@@ -35,7 +44,7 @@ def choose_action_greedy(dice, model):
 
 def choose_action_probabilistic(dice, model):
 	# print(dice)
-	state = Variable(torch.tensor(dice).type(torch.FloatTensor))
+	state = Variable(torch.tensor(generate_input(dice)).type(torch.FloatTensor).unsqueeze(0))
 	categories = Categorical(model(state))
 	action = categories.sample()
 
@@ -47,7 +56,7 @@ action_space = 2^num_dice
 state_space = 252
 gamma = 0.99
 
-l = dqn.Linear(num_dice,2 ** num_dice)
+l = dqn.DQN()
 #l.train()
 
 
