@@ -43,9 +43,9 @@ l = dqn.Linear(num_dice,2 ** num_dice)
 
 
 
-num_games = 1000000
+num_games = 10000000
 env = yt.mini_environment(num_dice, 6)
-epoch_length = 10000
+epoch_length = 100000
 rolls_allowed = 2
 
 long_running_average = []

@@ -58,7 +58,6 @@ import torch.nn.functional as functional
 
 class DQN(nn.Module):
 	def __init__(self):
-<<<<<<< HEAD
 		super(DQN, self).__init__()
 		self.conv1 = nn.Conv1d(5, 32, kernel_size=3, stride= 8)
 		self.conv2 = nn.Conv1d(32, 64, kernel_size=8, stride=4)

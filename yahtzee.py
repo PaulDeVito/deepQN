@@ -40,12 +40,9 @@ class mini_environment(object):
 		elif self.num_dice == 2:
 			return '{0:02b}'
 
-	def roll_dice(self, save):
-		# print("old dice: ", self.dice)
-		# print(save)
+
+	def roll(self, mask):
 		newdice = []
-		mask = self.get_mask().format(save)
-		# print(mask)
 		lookup = {}
 		for i in range(self.num_dice):
 			lookup[i] = (mask[i] == '1')
@@ -60,6 +57,15 @@ class mini_environment(object):
 		# print("new dice: ", newdice)
 		# newdice.sort()
 		self.dice = newdice
+
+
+	def roll_dice(self, save):
+		mask = self.get_mask().format(save)
+		self.roll(mask)
+		
+
+	
+
 
 
 	def validate_yahtzee(self):
