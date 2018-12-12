@@ -171,33 +171,28 @@ class full_environment(object):
 
 	def reset_dice(self):
 		dice = []
-		for i in range(self.num_dice):
-			dice.append(random.randint(1,self.dice_range))
+		for i in range(5):
+			dice.append(random.randint(1,6))
 
 		# dice.sort()
 		self.dice = dice
 
 	def get_mask(self):
-		if self.num_dice == 5:
-			return '{0:05b}'
-		elif self.num_dice == 3:
-			return '{0:03b}'
-		elif self.num_dice == 2:
-			return '{0:02b}'
+		return '{0:05b}'
 
 	def roll_dice(self, save):
 		newdice = []
 		mask = self.get_mask().format(save)
 		lookup = {}
-		for i in range(self.num_dice):
+		for i in range(5):
 			lookup[i] = (mask[i] == '1')
-		for i in range(self.num_dice):
+		for i in range(5):
 			if (lookup[i]):
 				newdice.append(self.dice[i])
 			else: 
-				newdice.append(random.randint(1,self.dice_range))
-				if (self.dice[i] == self.dice_range):
-					self.num_max_dice_rerolled += 1
+				newdice.append(random.randint(1,6))
+				# if (self.dice[i] == self.dice_range):
+				# 	self.num_max_dice_rerolled += 1
 
 		# newdice.sort()
 		self.dice = newdice

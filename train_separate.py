@@ -40,27 +40,28 @@ action_space = 2^num_dice
 state_space = 252
 gamma = 0.99
 
+sm = nn.Softmax(dim=0)
 
-def update_action_history(l, log, avg)
+def update_action_history(l, log, avg):
 	if (l.action_history.dim() != 0):
 			l.action_history = torch.cat([l.action_history,-(log - avg)])
-		else:
-			l.action_history = -(log - avg)
+	else:
+		l.action_history = -(log - avg)
 
 def choose_average_action_probabilistic(dice, models):
 	state = Variable(torch.tensor(dice).type(torch.FloatTensor))
 	p_vals = []
 	for i in range(2 ** num_dice):
 		p_vals.append(0.)
-	base = torch.tensor(p_vals)
+	p_vals = torch.tensor(p_vals)
 	c_dists = []
 	for m in models:
 		output = m(state)
 		p_vals += output
-		c.append(Categorical(output))
+		c_dists.append(Categorical(output))
 		
 	# pick averaged action
-	p_vals = nn.Softmax(p_vals, dim=0)
+	p_vals = sm(p_vals)
 	categories = Categorical(p_vals)
 	action = categories.sample()
 
@@ -68,8 +69,8 @@ def choose_average_action_probabilistic(dice, models):
 	for i in range(len(models)):
 		c = c_dists[i]
 		l = models[i]
-		log = categories.log_prob(action).unsqueeze(0)
-		avg = categories.logits.mean()
+		log = c.log_prob(action).unsqueeze(0)
+		avg = c.logits.mean()
 		update_action_history(l, log, avg)
 		
 
@@ -91,7 +92,7 @@ def update_weights(l, reward_history):
 	loss.backward()
 	l.optimizer.step()
 
-
+	return loss
 
 l_kind = dqn.Linear(num_dice,2 ** num_dice)
 l_two_kind = dqn.Linear(num_dice,2 ** num_dice)
@@ -102,10 +103,10 @@ l_flush = dqn.Linear(num_dice,2 ** num_dice)
 models = [l_kind, l_two_kind, l_straight, l_flush]
 
 
-num_games = 1000000
+num_games = 10000000
 env = yt.full_environment("all")
 # some much needed testing. like why is there no yahtzee
-epoch_length = 10000
+epoch_length = 1000
 rolls_allowed = 3
 
 long_running_average = []
@@ -146,16 +147,33 @@ for game in range(num_games):
 			num_yahtzees += 1
 
 	
-	update_weights(l_kind, reward_history_kind)
-	update_weights(l_two_kind, reward_history_two_kind)
-	update_weights(l_straight, reward_history_straight)
-	update_weights(l_flush, reward_history_flush)
+	# print("first loop")
+	loss1 = update_weights(l_kind, reward_history_kind)
+	loss2 = update_weights(l_two_kind, reward_history_two_kind)
+	loss3 = update_weights(l_straight, reward_history_straight)
+	loss4 = update_weights(l_flush, reward_history_flush)
+
+
+
+	# loss_kind = calculate_loss(l_kind, reward_history_kind)
+	# loss_two_kind = calculate_loss(l_two_kind, reward_history_two_kind)
+	# loss_straight = calculate_loss(l_straight, reward_history_straight)
+	# loss_flush = calculate_loss(l_flush, reward_history_flush)
+# 
+	# l_kind.optimizer.zero_grad()
+	# loss_kind.backward()
+	# l_kind.optimizer.step()
+	# l_two_kind.optimizer.zero_grad()
+	# loss_two_kind.backward()
+	# l_two_kind.optimizer.step()
+
+
 
 	running_average.append(env.points)
-	loss_history.append(loss)
+	loss_history.append(sum([loss1, loss2, loss3, loss4]))
 	if (game%epoch_length == 0):
 		points = sum(running_average)/epoch_length
-		avg_loss = (sum(loss_history)/epoch_length).item()
+		avg_loss = math.exp((sum(loss_history)/epoch_length).item())
 		time_elapsed = time.time() - start_time
 		print("Game ", str(game), " -------------------------------------------------------------------------")
 		print("average: ", points, "  Yahtzees: ", num_yahtzees, "   Loss: ", avg_loss, "   Time: ", time_elapsed)
